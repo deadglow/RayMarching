@@ -18,7 +18,7 @@ namespace RayMarching
 
 		public override float SignedDist(Vector3 point)
 		{
-			return (point + position).Magnitude() - 1;
+			return (point - position).Magnitude() - radius;
 		}
 	}
 }

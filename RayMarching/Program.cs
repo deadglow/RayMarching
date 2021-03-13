@@ -49,10 +49,10 @@ namespace RayMarching
 							cam.position.z -= moveSpeed;
 							break;
 						case ConsoleKey.Add:
-							cam.CollisionDistance += 0.1f;
+							cam.VFov += 1f;
 							break;
 						case ConsoleKey.Subtract:
-							cam.CollisionDistance -= 0.1f;
+							cam.VFov-= 1f;
 							break;
 
 						default:

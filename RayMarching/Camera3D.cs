@@ -9,7 +9,7 @@ namespace RayMarching
 		public Vector3 position = new Vector3();
 		private Vector2 resolution;
 		public float AspectRatio { get; private set; }
-		private float vFov = 100f;
+		private float vFov = 88f;
 		public float VFov 
 		{
 			get
@@ -24,9 +24,9 @@ namespace RayMarching
 		}
 		public float HFov { get; private set; }
 		public float ClipPlaneDistance { get; set; } = 0.1f;
-		public int MaxMarchSteps { get; set; } = 500;
+		public int MaxMarchSteps { get; set; } = 100;
 		public float MaxRayDistance { get; set; } = 1000f;
-		public float CollisionDistance { get; set; } = 1f;
+		public float CollisionDistance { get; set; } = 0.3f;
 
 		public Camera3D(Vector2 resolution)
 		{
@@ -37,8 +37,8 @@ namespace RayMarching
 
 		public void Render(Scene scene)
 		{
-			Vector3 clipPlaneBorder = new Vector3(ClipPlaneDistance / (float)Math.Cos(HFov), ClipPlaneDistance / (float)Math.Sin(VFov), ClipPlaneDistance);
-			Vector3 clipPlaneSize = clipPlaneBorder * 2;
+			Vector3 clipPlaneBorder = new Vector3(-ClipPlaneDistance * (float)Math.Tan(HFov), -ClipPlaneDistance * (float)Math.Tan(VFov), ClipPlaneDistance);
+			Vector3 clipPlaneSize = new Vector3(Math.Abs(clipPlaneBorder.x), Math.Abs(clipPlaneBorder.y), 0) * 2;
 			Vector3 point;
 			Vector3 heading;
 			Geometry hitObject;
@@ -47,9 +47,10 @@ namespace RayMarching
 			{
 				for (int y = 0; y < resolution.y; ++y)
 				{
-					Renderer.DrawPixel((short)x, (short)y, ' ', ConsoleColor.Green, ConsoleColor.White);
-					point = position - clipPlaneBorder + new Vector3(clipPlaneSize.x * x / resolution.x, clipPlaneSize.y * y / resolution.y, 1);
-					heading = (point - position).Normalised();
+					//Renderer.DrawPixel((short)x, (short)y, ' ', ConsoleColor.Green, ConsoleColor.White);
+					point = clipPlaneBorder + new Vector3(clipPlaneSize.x * x / resolution.x, clipPlaneSize.y * y / resolution.y, 0);
+					heading = point.Normalised();
+					point += position;
 
 					hitObject = CastRay(point, heading, scene);
 
