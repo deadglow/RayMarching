@@ -68,6 +68,25 @@ namespace RayMarching
 			up = Vector3.Cross(forward, right);
 		}
 
+		public void RotateYaw(float angle)
+		{
+			float rad = angle * Program.Deg2Rad;
+			Vector3 newForward = new Vector3(
+				forward.x * (float)Math.Cos(rad) + forward.z * (float)Math.Sin(rad),
+				forward.y,
+				-forward.x * (float)Math.Sin(rad) + forward.z * (float)Math.Cos(rad));
+			SetForward(newForward);
+		}
+		public void RotatePitch(float angle)
+		{
+			float rad = angle * Program.Deg2Rad;
+			Vector3 newForward = new Vector3(
+				forward.x,
+				forward.y * (float)Math.Cos(rad) - forward.z * (float)Math.Sin(rad),
+				forward.y * (float)Math.Sin(rad) + forward.z * (float)Math.Cos(rad));
+			SetForward(newForward);
+		}
+
 		public void Render(Scene scene)
 		{
 			//Converts vFov to radians
@@ -91,27 +110,29 @@ namespace RayMarching
 					Vector3 heading = (forward + xComp + yComp).Normalised();
 
 					Collision col;
-					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col);
+					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col, new Vector2(x, y));
 					
 					if (hitObject != null)
 					{
+						//Gets pointing vector from
 						Vector3 pointToLight = scene.lights[0].position - col.point;
-						pointToLight = pointToLight.Normalised();
+						float pointToLightDist = pointToLight.Magnitude();
+						pointToLight /= pointToLightDist;
 						float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
 
-						char character = shading[(int)Math.Floor(ratio * shading.Length)];
+						char character = shading[(int)Math.Round(ratio * (shading.Length - 1))];
+
+						if (CastRay(scene, col.point + col.normal, pointToLight, pointToLightDist, 30, out _, new Vector2(-1, -1), col.hitObject) != null)
+							character = shading[0];
 
 						Renderer.DrawPixel(x, y, character, hitObject.color, ConsoleColor.Black);
 					}
 				}
 			}
-			//Parallel.For(0, (int)resolution.y,
-			//	y =>
-			//	);
 		}
 
 		//Gets distance to closest object, use out for closest object reference
-		public float GetDistanceToScene(Vector3 point, Scene scene, out Geometry hitObject)
+		public float GetDistanceToScene(Vector3 point, Scene scene, out Geometry hitObject, Geometry ignoredGeometry = null)
 		{
 			hitObject = null;
 			float dist = MaxRayDistance;
@@ -119,6 +140,9 @@ namespace RayMarching
 
 			for (int i = 0; i < scene.geometries.Count; ++i)
 			{
+				if (scene.geometries[i] == ignoredGeometry)
+					continue;
+
 				newDistance = scene.geometries[i].SignedDist(point);
 
 				if (newDistance < dist)
@@ -130,13 +154,14 @@ namespace RayMarching
 
 			return dist;
 		}
-		public float GetDistanceToScene(Vector3 point, Scene scene)
+		public float GetDistanceToScene(Vector3 point, Scene scene, Geometry ignoredGeometry = null)
 		{
-			return GetDistanceToScene(point, scene, out _);
+			return GetDistanceToScene(point, scene, out _, ignoredGeometry);
 		}
 
 		public Vector3 GetNormal(Vector3 point, Geometry geometry)
 		{
+			//Trapezoidal stuff, idk what any of this does
 			return 
 				(
 					epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
@@ -162,7 +187,7 @@ namespace RayMarching
 			}
 		}
 
-		public Geometry CastRay(Scene scene, Vector3 origin, Vector3 heading, float maxDist, float maxIterations, out Collision col)
+		public Geometry CastRay(Scene scene, Vector3 origin, Vector3 heading, float maxDist, float maxIterations, out Collision col, Vector2 coord, Geometry ignoredGeometry = null)
 		{
 			col = new Collision();
 			float rayDist = 0;
@@ -170,7 +195,10 @@ namespace RayMarching
 			for (int i = 0; i < maxIterations; ++i)
 			{
 				//Get closest distance to the scene
-				float distToScene = GetDistanceToScene(origin, scene, out Geometry hitObject);
+				float distToScene = GetDistanceToScene(origin, scene, out Geometry hitObject, ignoredGeometry);
+
+				if (coord.x > -1 && distToScene < CollisionThreshold + 0.05f)
+					Renderer.DrawPixel((int)coord.x, (int)coord.y, ' ', ConsoleColor.White, ConsoleColor.White);
 
 				if (distToScene < CollisionThreshold)
 				{
