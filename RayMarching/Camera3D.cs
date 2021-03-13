@@ -49,8 +49,8 @@ namespace RayMarching
 			}
 		}
 		public float HFov { get; private set; }
-		public int MaxMarchSteps { get; set; } = 30;
-		public float MaxRayDistance { get; set; } = 30f;
+		public int MaxMarchSteps { get; set; } = 50;
+		public float MaxRayDistance { get; set; } = 100f;
 		public float CollisionThreshold { get; set; } = 0.02f;
 
 		public Camera3D(Vector2 resolution)
@@ -110,7 +110,7 @@ namespace RayMarching
 					Vector3 heading = (forward + xComp + yComp).Normalised();
 
 					Collision col;
-					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col, new Vector2(x, y));
+					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col, new Vector2(-x, y));
 					
 					if (hitObject != null)
 					{
@@ -119,9 +119,10 @@ namespace RayMarching
 						float pointToLightDist = pointToLight.Magnitude();
 						pointToLight /= pointToLightDist;
 						float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
-
-						char character = shading[(int)Math.Round(ratio * (shading.Length - 1))];
-
+						char character = '@';
+						if (!float.IsNaN(ratio))
+							character = shading[(int)Math.Round(ratio * (shading.Length - 1))];
+							
 						if (CastRay(scene, col.point + col.normal, pointToLight, pointToLightDist, 30, out _, new Vector2(-1, -1), col.hitObject) != null)
 							character = shading[0];
 

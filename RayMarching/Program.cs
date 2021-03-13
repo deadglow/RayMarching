@@ -17,12 +17,13 @@ namespace RayMarching
 		{
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
-			mainScene.lights.Add(new Light(new Vector3(-30, -100, 0)));
+			mainScene.lights.Add(new Light(new Vector3(-30, -50, 20)));
 
-			//mainScene.geometries.Add(new Sphere(new Vector3(0, 0, 0), ConsoleColor.Red, 1));
-			mainScene.geometries.Add(new Sphere(new Vector3(6, 2, 5), ConsoleColor.Red, 3));
-			mainScene.geometries.Add(new Sphere(new Vector3(-3, -5, 5), ConsoleColor.Red, 1f));
-			mainScene.geometries.Add(new Box(new Vector3(1, 0, 5), ConsoleColor.Cyan, new Vector3(1, 1, 1)));
+			cam.position.y = -3;
+			mainScene.geometries.Add(new Box(new Vector3(0, 2, 0), ConsoleColor.Green, new Vector3(30, 1, 30)));
+			mainScene.geometries.Add(new Box(new Vector3(0, -1, 2), ConsoleColor.Blue, new Vector3(1, 5, 1)));
+			mainScene.geometries.Add(new Sphere(new Vector3(3, -5, 3), ConsoleColor.Red, 1f));
+			mainScene.geometries.Add(new Sphere(new Vector3(-3, -3, 2), ConsoleColor.Magenta, 2f));
 
 			while (true)
 			{
