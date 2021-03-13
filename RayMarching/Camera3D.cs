@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using MathLib;
 using ConsoleRender;
 
@@ -7,9 +8,13 @@ namespace RayMarching
 	class Camera3D
 	{
 		public Vector3 position = new Vector3();
+		public Vector3 forward = new Vector3();
+		public Vector3 right = new Vector3();
+		public Vector3 up = new Vector3();
+
 		private Vector2 resolution;
 		public float AspectRatio { get; private set; }
-		private float vFov = 88f;
+		private float vFov = 70f;
 		public float VFov 
 		{
 			get
@@ -24,40 +29,63 @@ namespace RayMarching
 		}
 		public float HFov { get; private set; }
 		public float ClipPlaneDistance { get; set; } = 0.1f;
-		public int MaxMarchSteps { get; set; } = 100;
-		public float MaxRayDistance { get; set; } = 1000f;
-		public float CollisionDistance { get; set; } = 0.3f;
+		public int MaxMarchSteps { get; set; } = 200;
+		public float MaxRayDistance { get; set; } = 100f;
+		public float CollisionThreshold { get; set; } = 0.3f;
 
 		public Camera3D(Vector2 resolution)
 		{
 			this.resolution = resolution;
 			AspectRatio = resolution.x / resolution.y;
 			VFov = vFov;
+			SetForward(new Vector3(0, 0, 1));
+		}
+
+		public void SetForward(Vector3 vect)
+		{
+			forward = vect;
+			right = Vector3.Cross(forward, new Vector3(0, -1, 0));
+			up = Vector3.Cross(forward, right);
 		}
 
 		public void Render(Scene scene)
 		{
-			Vector3 clipPlaneBorder = new Vector3(-ClipPlaneDistance * (float)Math.Tan(HFov), -ClipPlaneDistance * (float)Math.Tan(VFov), ClipPlaneDistance);
-			Vector3 clipPlaneSize = new Vector3(Math.Abs(clipPlaneBorder.x), Math.Abs(clipPlaneBorder.y), 0) * 2;
-			Vector3 point;
-			Vector3 heading;
-			Geometry hitObject;
+			float fovRad = (float)Math.PI * (vFov / 2) / 180;
+			float halfHeight = (float)Math.Tan(fovRad);
+			float halfWidth = halfHeight * AspectRatio;
+			Vector2 camSize = new Vector2(halfWidth, halfHeight) * 2;
+			Vector2 pixelSize = new Vector2(camSize.x / (resolution.x - 1), camSize.y / (resolution.y - 1));
 
-			for (int x = 0; x < resolution.x; ++x)
-			{
-				for (int y = 0; y < resolution.y; ++y)
+			//for (int y = 0; y < resolution.y; ++y)
+			Parallel.For(0, (int)resolution.y,
+				y =>
 				{
-					//Renderer.DrawPixel((short)x, (short)y, ' ', ConsoleColor.Green, ConsoleColor.White);
-					point = clipPlaneBorder + new Vector3(clipPlaneSize.x * x / resolution.x, clipPlaneSize.y * y / resolution.y, 0);
-					heading = point.Normalised();
-					point += position;
+					for (int x = 0; x < resolution.x; ++x)
+					{
+						Vector3 xComp = right * (x * pixelSize.x - halfWidth);
+						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
+						Vector3 heading = (forward + xComp + yComp).Normalised();
 
-					hitObject = CastRay(point, heading, scene);
+						Vector3 point = position;
+						float rayDist = 0;
 
-					if (hitObject != null)
-						Renderer.DrawPixel(x, y, ' ', hitObject.color, ConsoleColor.Black);
-				}
-			}
+						for (int i = 0; i < MaxMarchSteps; ++i)
+						{
+							float distToScene = GetDistanceToScene(point, scene, out Geometry hitObject);
+
+							if (distToScene < CollisionThreshold)
+							{
+								Renderer.DrawPixel(x, y, ' ', hitObject.color, ConsoleColor.Black);
+							}
+
+							point += heading * distToScene;
+							rayDist += distToScene;
+
+							if (rayDist > MaxRayDistance)
+								break;
+						}
+					}
+				});
 		}
 
 		//Gets distance to closest object, use out for closest object reference
@@ -85,31 +113,6 @@ namespace RayMarching
 		public float GetDistanceToScene(Vector3 point, Scene scene)
 		{
 			return GetDistanceToScene(point, scene, out _);
-		}
-
-		//Fires a ray, iterating until an object is hit or max distance is reached
-		public Geometry CastRay(Vector3 start, Vector3 heading, Scene scene)
-		{
-			float rayDist = 0;
-			Geometry hitObject;
-
-			for (int i = 0; i < MaxMarchSteps; ++i)
-			{
-				float distToScene = GetDistanceToScene(start, scene, out hitObject);
-
-				if (distToScene < CollisionDistance)
-				{
-					return hitObject;
-				}
-
-				start += heading * distToScene;
-				rayDist += distToScene;
-
-				if (rayDist > MaxRayDistance)
-					break;
-			}
-
-			return null;
 		}
 	}
 }

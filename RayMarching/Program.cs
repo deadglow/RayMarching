@@ -16,6 +16,7 @@ namespace RayMarching
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
 
+			//mainScene.geometries.Add(new Sphere(new Vector3(0, 0, 0), ConsoleColor.Red, 1));
 			mainScene.geometries.Add(new Sphere(new Vector3(6, 0, 5), ConsoleColor.Red, 3));
 			mainScene.geometries.Add(new Box(new Vector3(1, 0, 5), ConsoleColor.Cyan, new Vector3(1, 1, 1)));
 
@@ -48,11 +49,17 @@ namespace RayMarching
 						case ConsoleKey.NumPad1:
 							cam.position.z -= moveSpeed;
 							break;
-						case ConsoleKey.Add:
+						case ConsoleKey.NumPad7:
+							cam.VFov -= 1f;
+							break;
+						case ConsoleKey.NumPad8:
 							cam.VFov += 1f;
 							break;
+						case ConsoleKey.Add:
+							cam.CollisionThreshold += 0.01f;
+							break;
 						case ConsoleKey.Subtract:
-							cam.VFov-= 1f;
+							cam.CollisionThreshold -= 0.01f;
 							break;
 
 						default:
