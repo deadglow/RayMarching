@@ -7,13 +7,34 @@ namespace RayMarching
 {
 	class Camera3D
 	{
+		public const float epsilon = 0.001f;
+		public static readonly Vector2 epsilonVec = new Vector2(1, -1);
+		private static readonly Vector3 epsXYY = new Vector3(epsilonVec.x, epsilonVec.y, epsilonVec.y);
+		private static readonly Vector3 epsYYX = new Vector3(epsilonVec.y, epsilonVec.y, epsilonVec.x);
+		private static readonly Vector3 epsYXY = new Vector3(epsilonVec.y, epsilonVec.x, epsilonVec.y);
+		private static readonly Vector3 epsXXX = new Vector3(epsilonVec.x, epsilonVec.x, epsilonVec.x);
+
+		public static readonly char[] shading =
+		{
+			'@',
+			'#',
+			'+',
+			'=',
+			'-',
+			'.',
+			' '
+		};
+
 		public Vector3 position = new Vector3();
+		//Facing vectors
 		public Vector3 forward = new Vector3();
 		public Vector3 right = new Vector3();
 		public Vector3 up = new Vector3();
 
 		private Vector2 resolution;
+		//Width / height
 		public float AspectRatio { get; private set; }
+		//Vertical and horizontal FOV
 		private float vFov = 70f;
 		public float VFov 
 		{
@@ -28,10 +49,9 @@ namespace RayMarching
 			}
 		}
 		public float HFov { get; private set; }
-		public float ClipPlaneDistance { get; set; } = 0.1f;
-		public int MaxMarchSteps { get; set; } = 200;
-		public float MaxRayDistance { get; set; } = 100f;
-		public float CollisionThreshold { get; set; } = 0.3f;
+		public int MaxMarchSteps { get; set; } = 30;
+		public float MaxRayDistance { get; set; } = 30f;
+		public float CollisionThreshold { get; set; } = 0.02f;
 
 		public Camera3D(Vector2 resolution)
 		{
@@ -50,48 +70,50 @@ namespace RayMarching
 
 		public void Render(Scene scene)
 		{
+			//Converts vFov to radians
 			float fovRad = (float)Math.PI * (vFov / 2) / 180;
+			//Used to move the topleft of the rect away from the center
 			float halfHeight = (float)Math.Tan(fovRad);
 			float halfWidth = halfHeight * AspectRatio;
 			Vector2 camSize = new Vector2(halfWidth, halfHeight) * 2;
+			//Size of pixels in world space
 			Vector2 pixelSize = new Vector2(camSize.x / (resolution.x - 1), camSize.y / (resolution.y - 1));
+			//Ray origin
+			Vector3 point = position;
 
-			//for (int y = 0; y < resolution.y; ++y)
-			Parallel.For(0, (int)resolution.y,
-				y =>
+			for (int y = 0; y < resolution.y; ++y)
+			{
+				for (int x = 0; x < resolution.x; ++x)
 				{
-					for (int x = 0; x < resolution.x; ++x)
+					//Caculate which direction the ray will travel, based on which pixel is currently selected
+					Vector3 xComp = right * (x * pixelSize.x - halfWidth);
+					Vector3 yComp = up * (y * pixelSize.y - halfHeight);
+					Vector3 heading = (forward + xComp + yComp).Normalised();
+
+					Collision col;
+					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col);
+					
+					if (hitObject != null)
 					{
-						Vector3 xComp = right * (x * pixelSize.x - halfWidth);
-						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
-						Vector3 heading = (forward + xComp + yComp).Normalised();
+						Vector3 pointToLight = scene.lights[0].position - col.point;
+						pointToLight = pointToLight.Normalised();
+						float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
 
-						Vector3 point = position;
-						float rayDist = 0;
+						char character = shading[(int)Math.Floor(ratio * shading.Length)];
 
-						for (int i = 0; i < MaxMarchSteps; ++i)
-						{
-							float distToScene = GetDistanceToScene(point, scene, out Geometry hitObject);
-
-							if (distToScene < CollisionThreshold)
-							{
-								Renderer.DrawPixel(x, y, ' ', hitObject.color, ConsoleColor.Black);
-							}
-
-							point += heading * distToScene;
-							rayDist += distToScene;
-
-							if (rayDist > MaxRayDistance)
-								break;
-						}
+						Renderer.DrawPixel(x, y, character, hitObject.color, ConsoleColor.Black);
 					}
-				});
+				}
+			}
+			//Parallel.For(0, (int)resolution.y,
+			//	y =>
+			//	);
 		}
 
 		//Gets distance to closest object, use out for closest object reference
 		public float GetDistanceToScene(Vector3 point, Scene scene, out Geometry hitObject)
 		{
-			Geometry closestObject = null;
+			hitObject = null;
 			float dist = MaxRayDistance;
 			float newDistance;
 
@@ -101,18 +123,72 @@ namespace RayMarching
 
 				if (newDistance < dist)
 				{
-					closestObject = scene.geometries[i];
+					hitObject = scene.geometries[i];
 					dist = newDistance;
 				}
-
 			}
 
-			hitObject = closestObject;
 			return dist;
 		}
 		public float GetDistanceToScene(Vector3 point, Scene scene)
 		{
 			return GetDistanceToScene(point, scene, out _);
+		}
+
+		public Vector3 GetNormal(Vector3 point, Geometry geometry)
+		{
+			return 
+				(
+					epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
+					epsYYX * geometry.SignedDist(point + epsYYX * epsilon) +
+					epsYXY * geometry.SignedDist(point + epsYXY * epsilon) +
+					epsXXX * geometry.SignedDist(point + epsXXX * epsilon)
+				).Normalised();
+		}
+
+		public struct Collision
+		{
+			public Vector3 point;
+			public Vector3 normal;
+			public Geometry hitObject;
+			public float distance;
+
+			public Collision (Vector3 point, Vector3 normal, Geometry hitObject, float distance)
+			{
+				this.point = point;
+				this.normal = normal;
+				this.hitObject = hitObject;
+				this.distance = distance;
+			}
+		}
+
+		public Geometry CastRay(Scene scene, Vector3 origin, Vector3 heading, float maxDist, float maxIterations, out Collision col)
+		{
+			col = new Collision();
+			float rayDist = 0;
+
+			for (int i = 0; i < maxIterations; ++i)
+			{
+				//Get closest distance to the scene
+				float distToScene = GetDistanceToScene(origin, scene, out Geometry hitObject);
+
+				if (distToScene < CollisionThreshold)
+				{
+					col = new Collision(origin, GetNormal(origin, hitObject), hitObject, distToScene);
+
+					return hitObject;
+				}
+
+				//Moves point by the closest distance to ensure it doesn't hit anything
+				origin += heading * distToScene;
+				rayDist += distToScene;
+
+				//Cancels if too long
+				if (rayDist > MaxRayDistance)
+					break;
+			}
+
+			return null;
 		}
 	}
 }

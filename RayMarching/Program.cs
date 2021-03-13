@@ -15,6 +15,7 @@ namespace RayMarching
 		{
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
+			mainScene.lights.Add(new Light(new Vector3(1, -10, 1)));
 
 			//mainScene.geometries.Add(new Sphere(new Vector3(0, 0, 0), ConsoleColor.Red, 1));
 			mainScene.geometries.Add(new Sphere(new Vector3(6, 0, 5), ConsoleColor.Red, 3));
@@ -31,28 +32,28 @@ namespace RayMarching
 				{
 					switch(Console.ReadKey(true).Key)
 					{
-						case ConsoleKey.UpArrow:
+						case ConsoleKey.NumPad8:
 							cam.position.y -= moveSpeed;
 							break;
-						case ConsoleKey.DownArrow:
+						case ConsoleKey.NumPad5:
 							cam.position.y += moveSpeed;
 							break;
-						case ConsoleKey.LeftArrow:
+						case ConsoleKey.NumPad4:
 							cam.position.x -= moveSpeed;
 							break;
-						case ConsoleKey.RightArrow:
+						case ConsoleKey.NumPad6:
 							cam.position.x += moveSpeed;
 							break;
-						case ConsoleKey.NumPad4:
+						case ConsoleKey.NumPad7:
 							cam.position.z += moveSpeed;
 							break;
 						case ConsoleKey.NumPad1:
 							cam.position.z -= moveSpeed;
 							break;
-						case ConsoleKey.NumPad7:
+						case ConsoleKey.F:
 							cam.VFov -= 1f;
 							break;
-						case ConsoleKey.NumPad8:
+						case ConsoleKey.G:
 							cam.VFov += 1f;
 							break;
 						case ConsoleKey.Add:
