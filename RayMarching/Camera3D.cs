@@ -112,7 +112,7 @@ namespace RayMarching
 						Vector3 heading = (forward + xComp + yComp).Normalised();
 
 						Collision col;
-						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out col, new Vector2(-x, y));
+						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out col, new Vector2(x, y));
 					
 						if (hitObject != null)
 						{
@@ -132,7 +132,7 @@ namespace RayMarching
 
 								if (simulateShadows)
 								{
-									if (ratio > 0.8f)
+									if (ratio > 0.1f)
 									{
 										//Changes character to darkest character if theres an object between the collision point and the light source
 										Collision shadowCol = new Collision();
@@ -178,13 +178,12 @@ namespace RayMarching
 		public Vector3 GetNormal(Vector3 point, Geometry geometry)
 		{
 			//Trapezoidal stuff, idk what any of this does
-			return 
-				(
-					epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
+
+			return (epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
 					epsYYX * geometry.SignedDist(point + epsYYX * epsilon) +
 					epsYXY * geometry.SignedDist(point + epsYXY * epsilon) +
 					epsXXX * geometry.SignedDist(point + epsXXX * epsilon)
-				).Normalised();
+					).Normalised();
 		}
 
 		public struct Collision

@@ -19,21 +19,35 @@ namespace RayMarching
 			Console.CursorVisible = false;
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
-			mainScene.lights.Add(new Light(new Vector3(30, 50, 20)));
+			mainScene.lights.Add(new Light(Vector3.Zero));
 
-			cam.position.y = 3;
-			cam.position.z = -2;
-			mainScene.geometries.Add(new Box(new Vector3(0, -2, 0), ConsoleColor.Green, new Vector3(30, 1, 30)));
-			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), ConsoleColor.Blue, new Vector3(1, 5, 1)));
 			//mainScene.geometries.Add(new Sphere(new Vector3(3, 5, 3), ConsoleColor.Red, 1f));
 			//mainScene.geometries.Add(new Torus(new Vector3(-3, 3, 2), ConsoleColor.Magenta, new Vector2(3, 1)));
+
+			//Geometry[] roomShapes =
+			//{
+			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 5),
+			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 3)
+			//};
+
+			mainScene.geometries.Add(new Box(new Vector3(0, -0.5f, 0), ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
+			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), ConsoleColor.Blue, new Vector3(0.3f, 0.3f, 0.3f)));
+
+			Geometry[] roomShapes =
+			{
+				new Sphere(Vector3.Zero, ConsoleColor.White, 5),
+				new Sphere(Vector3.Zero, ConsoleColor.White, 4)
+			};
+			mainScene.geometries.Add(new GeoUnion(Vector3.Zero, ConsoleColor.Green, roomShapes));
+
 			Geometry[] geoUnionShapes =
 			{
 				new Box(Vector3.Zero, ConsoleColor.White, Vector3.One / 2),
 				new Sphere(Vector3.Zero, ConsoleColor.White, 0.7f)
 			};
-			GeoUnion geo = new GeoUnion(new Vector3(0, 10, 0), ConsoleColor.White, geoUnionShapes);
-			mainScene.geometries.Add(geo);		
+			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 0), ConsoleColor.White, geoUnionShapes);
+			
+			mainScene.geometries.Add(geo);
 
 			while (true)
 			{
