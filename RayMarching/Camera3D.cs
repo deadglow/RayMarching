@@ -111,9 +111,8 @@ namespace RayMarching
 						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
 						Vector3 heading = (forward + xComp + yComp).Normalised();
 
-						Collision col;
-						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out col, new Vector2(x, y));
-					
+						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out Collision col, new Vector2(x, y));
+
 						if (hitObject != null)
 						{
 							//Gets pointing vector from collision point to light source
@@ -146,7 +145,6 @@ namespace RayMarching
 							Renderer.DrawPixel(x, y, character, hitObject.color, ConsoleColor.Black);
 						}
 					}
-
 				});
 		}
 

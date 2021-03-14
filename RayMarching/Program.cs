@@ -30,7 +30,7 @@ namespace RayMarching
 			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 3)
 			//};
 
-			mainScene.geometries.Add(new Box(new Vector3(0, -0.5f, 0), ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
+			mainScene.geometries.Add(new Box(new Vector3(0, 1f, 0), ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
 			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), ConsoleColor.Blue, new Vector3(0.3f, 0.3f, 0.3f)));
 
 			Geometry[] roomShapes =
