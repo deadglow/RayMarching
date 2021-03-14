@@ -15,15 +15,23 @@ namespace RayMarching
 
 		static void Main(string[] args)
 		{
+			Console.CursorVisible = false;
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
-			mainScene.lights.Add(new Light(new Vector3(-30, -50, 20)));
+			mainScene.lights.Add(new Light(new Vector3(30, 50, 20)));
 
-			cam.position.y = -3;
-			mainScene.geometries.Add(new Box(new Vector3(0, 2, 0), ConsoleColor.Green, new Vector3(30, 1, 30)));
-			mainScene.geometries.Add(new Box(new Vector3(0, -1, 2), ConsoleColor.Blue, new Vector3(1, 5, 1)));
-			mainScene.geometries.Add(new Sphere(new Vector3(3, -5, 3), ConsoleColor.Red, 1f));
-			mainScene.geometries.Add(new Sphere(new Vector3(-3, -3, 2), ConsoleColor.Magenta, 2f));
+			cam.position.y = 3;
+			cam.position.z = -2;
+			mainScene.geometries.Add(new Box(new Vector3(0, -2, 0), ConsoleColor.Green, new Vector3(30, 1, 30)));
+			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), ConsoleColor.Blue, new Vector3(1, 5, 1)));
+			//mainScene.geometries.Add(new Sphere(new Vector3(3, 5, 3), ConsoleColor.Red, 1f));
+			//mainScene.geometries.Add(new Torus(new Vector3(-3, 3, 2), ConsoleColor.Magenta, new Vector2(3, 1)));
+			Geometry[] geoUnionShapes =
+			{
+				new Box(Vector3.Zero, ConsoleColor.White, Vector3.One / 2),
+				new Sphere(Vector3.Zero, ConsoleColor.White, 0.7f)
+			};
+			mainScene.geometries.Add(new GeoUnion(new Vector3(0, 10, 0), ConsoleColor.White, geoUnionShapes));		
 
 			while (true)
 			{
@@ -50,10 +58,10 @@ namespace RayMarching
 							cam.position += cam.right * moveSpeed;
 							break;
 						case ConsoleKey.NumPad6:
-							cam.RotateYaw(rotationSpeed);
+							cam.RotateYaw(-rotationSpeed);
 							break;
 						case ConsoleKey.NumPad4:
-							cam.RotateYaw(-rotationSpeed);
+							cam.RotateYaw(rotationSpeed);
 							break;
 						case ConsoleKey.NumPad8:
 							cam.RotatePitch(rotationSpeed);
@@ -68,7 +76,7 @@ namespace RayMarching
 							cam.position += cam.up * moveSpeed;
 							break;
 						case ConsoleKey.F:
-							cam.VFov -= 1f;
+							cam.simulateShadows = !cam.simulateShadows;
 							break;
 						case ConsoleKey.G:
 							cam.VFov += 1f;

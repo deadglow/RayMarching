@@ -25,6 +25,7 @@ namespace RayMarching
 			' '
 		};
 
+		public bool simulateShadows = true;
 		public Vector3 position = new Vector3();
 		//Facing vectors
 		public Vector3 forward = new Vector3();
@@ -35,7 +36,7 @@ namespace RayMarching
 		//Width / height
 		public float AspectRatio { get; private set; }
 		//Vertical and horizontal FOV
-		private float vFov = 70f;
+		private float vFov = 88f;
 		public float VFov 
 		{
 			get
@@ -50,7 +51,7 @@ namespace RayMarching
 		}
 		public float HFov { get; private set; }
 		public int MaxMarchSteps { get; set; } = 50;
-		public float MaxRayDistance { get; set; } = 100f;
+		public float MaxRayDistance { get; set; } = 150f;
 		public float CollisionThreshold { get; set; } = 0.02f;
 
 		public Camera3D(Vector2 resolution)
@@ -64,7 +65,7 @@ namespace RayMarching
 		public void SetForward(Vector3 vect)
 		{
 			forward = vect;
-			right = Vector3.Cross(forward, new Vector3(0, -1, 0));
+			right = Vector3.Cross(forward, new Vector3(0, 1, 0));
 			up = Vector3.Cross(forward, right);
 		}
 
@@ -100,40 +101,54 @@ namespace RayMarching
 			//Ray origin
 			Vector3 point = position;
 
-			for (int y = 0; y < resolution.y; ++y)
-			{
-				for (int x = 0; x < resolution.x; ++x)
+			Parallel.For(0, (int)resolution.y,
+				y =>
 				{
-					//Caculate which direction the ray will travel, based on which pixel is currently selected
-					Vector3 xComp = right * (x * pixelSize.x - halfWidth);
-					Vector3 yComp = up * (y * pixelSize.y - halfHeight);
-					Vector3 heading = (forward + xComp + yComp).Normalised();
-
-					Collision col;
-					Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, out col, new Vector2(-x, y));
-					
-					if (hitObject != null)
+					for (int x = 0; x < resolution.x; ++x)
 					{
-						//Gets pointing vector from
-						Vector3 pointToLight = scene.lights[0].position - col.point;
-						float pointToLightDist = pointToLight.Magnitude();
-						pointToLight /= pointToLightDist;
-						float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
-						char character = '@';
-						if (!float.IsNaN(ratio))
-							character = shading[(int)Math.Round(ratio * (shading.Length - 1))];
-							
-						if (CastRay(scene, col.point + col.normal, pointToLight, pointToLightDist, 30, out _, new Vector2(-1, -1), col.hitObject) != null)
-							character = shading[0];
+						//Caculate which direction the ray will travel, based on which pixel is currently selected
+						Vector3 xComp = right * (x * pixelSize.x - halfWidth);
+						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
+						Vector3 heading = (forward + xComp + yComp).Normalised();
 
-						Renderer.DrawPixel(x, y, character, hitObject.color, ConsoleColor.Black);
+						Collision col;
+						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out col, new Vector2(-x, y));
+					
+						if (hitObject != null)
+						{
+							//Gets pointing vector from collision point to light source
+							Vector3 pointToLight = scene.lights[0].position - col.point;
+							float pointToLightDist = pointToLight.Magnitude();
+							//Normalise pointToLight
+							pointToLight /= pointToLightDist;
+							//Ratio of shadow, maps dot product of 2 normalised vectors into a 0-1 value
+							float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
+							//Default character (shaded), this overcomes shading bug when normal is NaN
+							char character = '@';
+
+							if (!float.IsNaN(ratio))
+							{
+								character = shading[(int)Math.Round(ratio * (shading.Length - 1))];
+
+								if (simulateShadows)
+								{
+									//Changes character to darkest character if theres an object between the collision point and the light source
+									Collision shadowCol = new Collision();
+									CastRay(scene, scene.lights[0].position, -pointToLight, pointToLightDist, 30, CollisionThreshold, out shadowCol, new Vector2(-1, -1));
+									if (pointToLightDist - shadowCol.distanceTravelled > 0.1f)
+										character = shading[0];
+								}
+							}
+
+							Renderer.DrawPixel(x, y, character, hitObject.color, ConsoleColor.Black);
+						}
 					}
-				}
-			}
+
+				});
 		}
 
 		//Gets distance to closest object, use out for closest object reference
-		public float GetDistanceToScene(Vector3 point, Scene scene, out Geometry hitObject, Geometry ignoredGeometry = null)
+		public float GetDistanceToScene(Vector3 point, Scene scene, out Geometry hitObject)
 		{
 			hitObject = null;
 			float dist = MaxRayDistance;
@@ -141,9 +156,6 @@ namespace RayMarching
 
 			for (int i = 0; i < scene.geometries.Count; ++i)
 			{
-				if (scene.geometries[i] == ignoredGeometry)
-					continue;
-
 				newDistance = scene.geometries[i].SignedDist(point);
 
 				if (newDistance < dist)
@@ -155,9 +167,9 @@ namespace RayMarching
 
 			return dist;
 		}
-		public float GetDistanceToScene(Vector3 point, Scene scene, Geometry ignoredGeometry = null)
+		public float GetDistanceToScene(Vector3 point, Scene scene)
 		{
-			return GetDistanceToScene(point, scene, out _, ignoredGeometry);
+			return GetDistanceToScene(point, scene, out _);
 		}
 
 		public Vector3 GetNormal(Vector3 point, Geometry geometry)
@@ -177,46 +189,53 @@ namespace RayMarching
 			public Vector3 point;
 			public Vector3 normal;
 			public Geometry hitObject;
-			public float distance;
+			public float signedDist;
+			public float distanceTravelled;
 
-			public Collision (Vector3 point, Vector3 normal, Geometry hitObject, float distance)
+			public Collision (Vector3 point, Vector3 normal, Geometry hitObject, float signedDist, float distanceTravelled)
 			{
 				this.point = point;
 				this.normal = normal;
 				this.hitObject = hitObject;
-				this.distance = distance;
+				this.signedDist = signedDist;
+				this.distanceTravelled = distanceTravelled;
 			}
 		}
 
-		public Geometry CastRay(Scene scene, Vector3 origin, Vector3 heading, float maxDist, float maxIterations, out Collision col, Vector2 coord, Geometry ignoredGeometry = null)
+		public Geometry CastRay(Scene scene, Vector3 origin, Vector3 heading, float maxDist, float maxIterations, float collisionThreshold, out Collision col, Vector2 coord)
 		{
 			col = new Collision();
 			float rayDist = 0;
+			float distToSceneLimited;
 
 			for (int i = 0; i < maxIterations; ++i)
 			{
 				//Get closest distance to the scene
-				float distToScene = GetDistanceToScene(origin, scene, out Geometry hitObject, ignoredGeometry);
+				float distToScene = GetDistanceToScene(origin, scene, out Geometry hitObject);
 
-				if (coord.x > -1 && distToScene < CollisionThreshold + 0.05f)
+				if (coord.x > -1 && distToScene < collisionThreshold + 0.05f)
 					Renderer.DrawPixel((int)coord.x, (int)coord.y, ' ', ConsoleColor.White, ConsoleColor.White);
 
 				if (distToScene < CollisionThreshold)
 				{
-					col = new Collision(origin, GetNormal(origin, hitObject), hitObject, distToScene);
+					col = new Collision(origin, GetNormal(origin, hitObject), hitObject, distToScene, rayDist);
 
 					return hitObject;
 				}
+				
+				//Cancels if too long
+				if (rayDist >= maxDist)
+					break;
 
 				//Moves point by the closest distance to ensure it doesn't hit anything
-				origin += heading * distToScene;
-				rayDist += distToScene;
+				distToSceneLimited = Math.Min(distToScene, maxDist - rayDist);
+				origin += heading * distToSceneLimited;
+				rayDist += distToSceneLimited;
 
-				//Cancels if too long
-				if (rayDist > MaxRayDistance)
-					break;
+				
 			}
 
+			col.distanceTravelled = rayDist;
 			return null;
 		}
 	}
