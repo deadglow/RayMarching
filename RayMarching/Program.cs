@@ -6,6 +6,7 @@ namespace RayMarching
 {
 	class Program
 	{
+		public static ulong tick;
 		public static float Deg2Rad = 0.017453f;
 		public static Vector2 resolution = new Vector2(200, 160);
 		public static Camera3D cam;
@@ -31,15 +32,21 @@ namespace RayMarching
 				new Box(Vector3.Zero, ConsoleColor.White, Vector3.One / 2),
 				new Sphere(Vector3.Zero, ConsoleColor.White, 0.7f)
 			};
-			mainScene.geometries.Add(new GeoUnion(new Vector3(0, 10, 0), ConsoleColor.White, geoUnionShapes));		
+			GeoUnion geo = new GeoUnion(new Vector3(0, 10, 0), ConsoleColor.White, geoUnionShapes);
+			mainScene.geometries.Add(geo);		
 
 			while (true)
 			{
 				if (!Console.KeyAvailable)
 				{
-					//mainScene.lights[0].position = cam.position;
+					cam.SetForward(Vector3.Forward);
+					cam.RotatePitch(cam.rotation.x);
+					cam.RotateYaw(cam.rotation.y);
+
+					geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f);
 					cam.Render(mainScene);
 					Renderer.Render();
+					tick++;
 				}
 				else //input
 				{
@@ -58,16 +65,16 @@ namespace RayMarching
 							cam.position += cam.right * moveSpeed;
 							break;
 						case ConsoleKey.NumPad6:
-							cam.RotateYaw(-rotationSpeed);
+							cam.rotation.y -= rotationSpeed;
 							break;
 						case ConsoleKey.NumPad4:
-							cam.RotateYaw(rotationSpeed);
+							cam.rotation.y += rotationSpeed;
 							break;
 						case ConsoleKey.NumPad8:
-							cam.RotatePitch(rotationSpeed);
+							cam.rotation.x -= rotationSpeed;
 							break;
 						case ConsoleKey.NumPad5:
-							cam.RotatePitch(-rotationSpeed);
+							cam.rotation.x += rotationSpeed;
 							break;
 						case ConsoleKey.Q:
 							cam.position -= cam.up *  moveSpeed;

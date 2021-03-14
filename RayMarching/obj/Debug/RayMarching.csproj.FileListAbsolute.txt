@@ -9,3 +9,4 @@ D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.Cor
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.CopyComplete
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.exe
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.pdb
+D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csprojAssemblyReference.cache

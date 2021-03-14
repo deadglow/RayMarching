@@ -19,7 +19,7 @@ namespace RayMarching
 
 			for (int i = 1; i < shapes.Length; ++i)
 			{
-				finalDist = Math.Max(finalDist, shapes[i].SignedDist(point));
+				finalDist = Math.Max(finalDist, shapes[i].SignedDist(point) * -1);
 			}
 
 			return finalDist;

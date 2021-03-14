@@ -18,7 +18,6 @@ namespace RayMarching
 		{
 			'@',
 			'#',
-			'+',
 			'=',
 			'-',
 			'.',
@@ -31,6 +30,7 @@ namespace RayMarching
 		public Vector3 forward = new Vector3();
 		public Vector3 right = new Vector3();
 		public Vector3 up = new Vector3();
+		public Vector2 rotation = new Vector2(0, 0);
 
 		private Vector2 resolution;
 		//Width / height
@@ -121,7 +121,7 @@ namespace RayMarching
 							float pointToLightDist = pointToLight.Magnitude();
 							//Normalise pointToLight
 							pointToLight /= pointToLightDist;
-							//Ratio of shadow, maps dot product of 2 normalised vectors into a 0-1 value
+							//Ratio of shadow amount, maps dot product of 2 normalised vectors into a 0-1 value. 0 being full shadow, 1 being lit.
 							float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
 							//Default character (shaded), this overcomes shading bug when normal is NaN
 							char character = '@';
@@ -132,11 +132,14 @@ namespace RayMarching
 
 								if (simulateShadows)
 								{
-									//Changes character to darkest character if theres an object between the collision point and the light source
-									Collision shadowCol = new Collision();
-									CastRay(scene, scene.lights[0].position, -pointToLight, pointToLightDist, 30, CollisionThreshold, out shadowCol, new Vector2(-1, -1));
-									if (pointToLightDist - shadowCol.distanceTravelled > 0.1f)
-										character = shading[0];
+									if (ratio > 0.8f)
+									{
+										//Changes character to darkest character if theres an object between the collision point and the light source
+										Collision shadowCol = new Collision();
+										CastRay(scene, scene.lights[0].position, -pointToLight, pointToLightDist, 30, CollisionThreshold, out shadowCol, new Vector2(-1, -1));
+										if (pointToLightDist - shadowCol.distanceTravelled > 0.1f)
+											character = shading[0];
+									}
 								}
 							}
 
