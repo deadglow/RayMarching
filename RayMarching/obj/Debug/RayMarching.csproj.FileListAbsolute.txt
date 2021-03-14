@@ -5,7 +5,6 @@ D:\User Files\Dev\repos\RayMarching\RayMarching\bin\Debug\ConsoleRender.dll
 D:\User Files\Dev\repos\RayMarching\RayMarching\bin\Debug\MathLib.dll
 D:\User Files\Dev\repos\RayMarching\RayMarching\bin\Debug\ConsoleRender.pdb
 D:\User Files\Dev\repos\RayMarching\RayMarching\bin\Debug\MathLib.pdb
-D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csprojAssemblyReference.cache
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.CoreCompileInputs.cache
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.CopyComplete
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.exe
