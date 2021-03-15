@@ -19,19 +19,7 @@ namespace RayMarching
 			Console.CursorVisible = false;
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
-			mainScene.lights.Add(new Light(Vector3.Zero));
-
-			//mainScene.geometries.Add(new Sphere(new Vector3(3, 5, 3), ConsoleColor.Red, 1f));
-			//mainScene.geometries.Add(new Torus(new Vector3(-3, 3, 2), ConsoleColor.Magenta, new Vector2(3, 1)));
-
-			//Geometry[] roomShapes =
-			//{
-			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 5),
-			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 3)
-			//};
-
-			mainScene.geometries.Add(new Box(new Vector3(0, 1f, 0), Vector3.Zero, ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
-			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), Vector3.Zero, ConsoleColor.Blue, new Vector3(0.3f, 0.3f, 0.3f)));
+			mainScene.light = new Light(Vector3.Zero);
 
 			Geometry[] roomShapes =
 			{
@@ -42,11 +30,13 @@ namespace RayMarching
 
 			Geometry[] geoUnionShapes =
 			{
-				new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, new Vector3(1, 0.5f, 0.1f)),
+				new Torus(Vector3.Zero, Vector3.Zero, ConsoleColor.White, new Vector3(1, 0.5f, 1)),
 				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 1),
 			};
-			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Abs, GeoUnion.ModificationType.Base);
-			geo.t = 1;
+			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Lerp, GeoUnion.ModificationType.Base)
+			{
+				t = 0
+			};
 			mainScene.geometries.Add(geo);
 
 			while (true)
@@ -57,10 +47,12 @@ namespace RayMarching
 					cam.RotatePitch(cam.rotation.x);
 					cam.RotateYaw(cam.rotation.y);
 
-					mainScene.lights[0].position.x = (float)Math.Sin(tick * 0.1f) / 2;
-					mainScene.lights[0].position.y = (float)Math.Cos(tick * 0.1f) / 2;
+					//mainScene.light.position.x = (float)Math.Sin(tick * 0.1f) / 2;
+					//mainScene.light.position.y = (float)Math.Cos(tick * 0.1f) / 2;
 
-					geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f) * 2;
+					geo.t = (float)(Math.Sin(tick * 0.1f) + 1) / 2;
+
+					//geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f) * 2;
 					cam.Render(mainScene);
 					Renderer.Render();
 					tick++;

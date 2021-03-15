@@ -9,6 +9,6 @@ namespace RayMarching
 	class Scene
 	{
 		public List<Geometry> geometries = new List<Geometry>();
-		public List<Light> lights = new List<Light>();
+		public Light light;
 	}
 }

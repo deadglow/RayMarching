@@ -116,7 +116,7 @@ namespace RayMarching
 						if (hitObject != null)
 						{
 							//Gets pointing vector from collision point to light source
-							Vector3 pointToLight = scene.lights[0].position - col.point;
+							Vector3 pointToLight = scene.light.position - col.point;
 							float pointToLightDist = pointToLight.Magnitude();
 							//Normalise pointToLight
 							pointToLight /= pointToLightDist;
@@ -135,7 +135,7 @@ namespace RayMarching
 									{
 										//Changes character to darkest character if theres an object between the collision point and the light source
 										Collision shadowCol = new Collision();
-										CastRay(scene, scene.lights[0].position, -pointToLight, pointToLightDist, 30, CollisionThreshold, out shadowCol, new Vector2(-1, -1));
+										CastRay(scene, scene.light.position, -pointToLight, pointToLightDist, 30, CollisionThreshold, out shadowCol, new Vector2(-1, -1));
 										if (pointToLightDist - shadowCol.distanceTravelled > 0.1f)
 											character = shading[0];
 									}

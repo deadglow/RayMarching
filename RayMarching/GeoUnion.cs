@@ -13,6 +13,7 @@ namespace RayMarching
 			new PerformCalculation(Intersection),
 			new PerformCalculation(Cutout),
 			new PerformCalculation(Abs),
+			new PerformCalculation(Lerp),
 			new PerformCalculation(Smooth)
 		};
 		public static ModifyDistance[] Modifications =
@@ -39,11 +40,13 @@ namespace RayMarching
 			Intersection,
 			Cutout,
 			Abs,
+			Lerp,
 			Smooth
 		}
 		public enum ModificationType
 		{
 			Base,
+			Abs
 		}
 
 		public override float SignedDist(Vector3 point)
@@ -79,6 +82,10 @@ namespace RayMarching
 		{
 			float h = Math.Min(1.0f, Math.Max(0.5f * 0.5f * (a - b) / t, 0.0f));
 			return (a + (b - a) * h) - t * h * (1 - h);
+		}
+		public static float Lerp(float a, float b, float t)
+		{
+			return a + (b - a) * t;
 		}
 
 
