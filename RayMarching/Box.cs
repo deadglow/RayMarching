@@ -7,7 +7,7 @@ namespace RayMarching
 	{
 		public Vector3 halfSize = new Vector3(1f, 1f, 1f);
 
-		public Box(Vector3 position, ConsoleColor color, Vector3 halfSize) : base(position, color)
+		public Box(Vector3 position, Vector3 rotation, ConsoleColor color, Vector3 halfSize) : base(position, rotation, color)
 		{
 			this.halfSize = halfSize;
 		}

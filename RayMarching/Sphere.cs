@@ -11,7 +11,7 @@ namespace RayMarching
 	{
 		public float radius;
 
-		public Sphere(Vector3 position, ConsoleColor color, float radius) : base(position, color)
+		public Sphere(Vector3 position, Vector3 rotation, ConsoleColor color, float radius) : base(position, rotation, color)
 		{
 			this.radius = radius;
 		}

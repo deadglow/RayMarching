@@ -7,7 +7,7 @@ namespace RayMarching
 	{
 		Vector2 dimensions;
 
-		public Torus(Vector3 position, ConsoleColor col, Vector2 dim) : base(position, col)
+		public Torus(Vector3 position, Vector3 rotation, ConsoleColor col, Vector2 dim) : base(position, rotation, col)
 		{
 			dimensions = dim;
 		}

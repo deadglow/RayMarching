@@ -7,7 +7,7 @@ namespace RayMarching
 {
 	class Camera3D
 	{
-		public const float epsilon = 0.001f;
+		public const float epsilon = 0.0001f;
 		public static readonly Vector2 epsilonVec = new Vector2(1, -1);
 		private static readonly Vector3 epsXYY = new Vector3(epsilonVec.x, epsilonVec.y, epsilonVec.y);
 		private static readonly Vector3 epsYYX = new Vector3(epsilonVec.y, epsilonVec.y, epsilonVec.x);
@@ -111,7 +111,7 @@ namespace RayMarching
 						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
 						Vector3 heading = (forward + xComp + yComp).Normalised();
 
-						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out Collision col, new Vector2(x, y));
+						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out Collision col, new Vector2(-x, y));
 
 						if (hitObject != null)
 						{
@@ -123,7 +123,7 @@ namespace RayMarching
 							//Ratio of shadow amount, maps dot product of 2 normalised vectors into a 0-1 value. 0 being full shadow, 1 being lit.
 							float ratio = (Vector3.Dot(col.normal, pointToLight) + 1) / 2;
 							//Default character (shaded), this overcomes shading bug when normal is NaN
-							char character = '@';
+							char character = ' ';
 
 							if (!float.IsNaN(ratio))
 							{
@@ -231,8 +231,6 @@ namespace RayMarching
 				distToSceneLimited = Math.Min(distToScene, maxDist - rayDist);
 				origin += heading * distToSceneLimited;
 				rayDist += distToSceneLimited;
-
-				
 			}
 
 			col.distanceTravelled = rayDist;

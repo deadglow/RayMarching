@@ -10,3 +10,12 @@ D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.Cop
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.exe
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.pdb
 D:\User Files\Dev\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csprojAssemblyReference.cache
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\RayMarching.exe.config
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\RayMarching.exe
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\RayMarching.pdb
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\MathLib.dll
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\MathLib.pdb
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csproj.CopyComplete
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.exe
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.pdb
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csprojAssemblyReference.cache

@@ -30,23 +30,23 @@ namespace RayMarching
 			//	new Box(Vector3.Zero, ConsoleColor.White, Vector3.One * 3)
 			//};
 
-			mainScene.geometries.Add(new Box(new Vector3(0, 1f, 0), ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
-			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), ConsoleColor.Blue, new Vector3(0.3f, 0.3f, 0.3f)));
+			mainScene.geometries.Add(new Box(new Vector3(0, 1f, 0), Vector3.Zero, ConsoleColor.Magenta, new Vector3(0.3f, 0.3f, 0.3f)));
+			mainScene.geometries.Add(new Box(new Vector3(0, 1, 2), Vector3.Zero, ConsoleColor.Blue, new Vector3(0.3f, 0.3f, 0.3f)));
 
 			Geometry[] roomShapes =
 			{
-				new Sphere(Vector3.Zero, ConsoleColor.White, 5),
-				new Sphere(Vector3.Zero, ConsoleColor.White, 4)
+				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 8),
+				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 7)
 			};
-			mainScene.geometries.Add(new GeoUnion(Vector3.Zero, ConsoleColor.Green, roomShapes));
+			mainScene.geometries.Add(new GeoUnion(Vector3.Zero, Vector3.Zero, ConsoleColor.Green, roomShapes, GeoUnion.CalculationType.Cutout, GeoUnion.ModificationType.Base));
 
 			Geometry[] geoUnionShapes =
 			{
-				new Box(Vector3.Zero, ConsoleColor.White, Vector3.One / 2),
-				new Sphere(Vector3.Zero, ConsoleColor.White, 0.7f)
+				new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, new Vector3(1, 0.5f, 0.1f)),
+				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 1),
 			};
-			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 0), ConsoleColor.White, geoUnionShapes);
-			
+			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Abs, GeoUnion.ModificationType.Base);
+			geo.t = 1;
 			mainScene.geometries.Add(geo);
 
 			while (true)
@@ -57,7 +57,10 @@ namespace RayMarching
 					cam.RotatePitch(cam.rotation.x);
 					cam.RotateYaw(cam.rotation.y);
 
-					geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f);
+					mainScene.lights[0].position.x = (float)Math.Sin(tick * 0.1f) / 2;
+					mainScene.lights[0].position.y = (float)Math.Cos(tick * 0.1f) / 2;
+
+					geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f) * 2;
 					cam.Render(mainScene);
 					Renderer.Render();
 					tick++;
@@ -100,13 +103,16 @@ namespace RayMarching
 							cam.simulateShadows = !cam.simulateShadows;
 							break;
 						case ConsoleKey.G:
+							cam.VFov -= 1f;
+							break;
+						case ConsoleKey.H:
 							cam.VFov += 1f;
 							break;
 						case ConsoleKey.Add:
-							cam.CollisionThreshold += 0.01f;
+							cam.CollisionThreshold += 0.001f;
 							break;
 						case ConsoleKey.Subtract:
-							cam.CollisionThreshold -= 0.01f;
+							cam.CollisionThreshold -= 0.001f;
 							break;
 
 						default:
