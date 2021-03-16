@@ -19,3 +19,4 @@ C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csp
 C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.exe
 C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.pdb
 C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\obj\Debug\RayMarching.csprojAssemblyReference.cache
+C:\Users\s210694\Desktop\repos\RayMarching\RayMarching\bin\Debug\ConsoleRender.pdb

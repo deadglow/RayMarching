@@ -31,13 +31,21 @@ namespace RayMarching
 			Geometry[] geoUnionShapes =
 			{
 				new Torus(Vector3.Zero, Vector3.Zero, ConsoleColor.White, new Vector3(1, 0.5f, 1)),
-				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 1),
+				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 1)
+				//new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, Vector3.One)
+
 			};
-			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Lerp, GeoUnion.ModificationType.Base)
+			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 0), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Lerp, GeoUnion.ModificationType.Base)
 			{
 				t = 0
 			};
-			mainScene.geometries.Add(geo);
+
+			Geometry[] obamaShape =
+			{
+				new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, Vector3.One * 0.8f),
+				geo
+			};
+			mainScene.geometries.Add(new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.Red, obamaShape, GeoUnion.CalculationType.Abs, GeoUnion.ModificationType.Base));
 
 			while (true)
 			{
