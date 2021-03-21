@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Box.cs" />
     <Compile Include="Camera3D.cs" />
+    <Compile Include="Ellipsoid.cs" />
     <Compile Include="Geometry.cs" />
     <Compile Include="GeoUnion.cs" />
     <Compile Include="Light.cs" />

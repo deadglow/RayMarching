@@ -19,48 +19,38 @@ namespace RayMarching
 			Console.CursorVisible = false;
 			Renderer.InitialiseRenderer((short)resolution.x, (short)resolution.y, 2, "Consolas", 6);
 			cam = new Camera3D(resolution);
-			mainScene.light = new Light(Vector3.Zero);
+			mainScene.light = new Light(new Vector3(0, 10, 0));
+			cam.simulateShadows = false;
 
-			Geometry[] roomShapes =
-			{
-				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 8),
-				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 7)
-			};
-			mainScene.geometries.Add(new GeoUnion(Vector3.Zero, Vector3.Zero, ConsoleColor.Green, roomShapes, GeoUnion.CalculationType.Cutout, GeoUnion.ModificationType.Base));
+			cam.position.z -= 4;
+			cam.position.y += 1;
 
-			Geometry[] geoUnionShapes =
+			Geometry[] bodyparts =
 			{
-				new Torus(Vector3.Zero, Vector3.Zero, ConsoleColor.White, new Vector3(1, 0.5f, 1)),
-				new Sphere(Vector3.Zero, Vector3.Zero, ConsoleColor.White, 1)
-				//new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, Vector3.One)
-
-			};
-			GeoUnion geo = new GeoUnion(new Vector3(0, 0, 0), Vector3.Zero, ConsoleColor.White, geoUnionShapes, GeoUnion.CalculationType.Lerp, GeoUnion.ModificationType.Base)
-			{
-				t = 0
+			new Ellipsoid(Vector3.Zero, Vector3.Zero, ConsoleColor.Red, new Vector3(1, 2, 1)),
+			new Ellipsoid(new Vector3(0, -1.5f, 0), Vector3.Zero, ConsoleColor.Red, new Vector3(0.3f, 0.7f, 2f))
 			};
 
-			Geometry[] obamaShape =
-			{
-				new Box(Vector3.Zero, Vector3.Zero, ConsoleColor.White, Vector3.One * 0.8f),
-				geo
-			};
-			mainScene.geometries.Add(new GeoUnion(new Vector3(0, 0, 3), Vector3.Zero, ConsoleColor.Red, obamaShape, GeoUnion.CalculationType.Abs, GeoUnion.ModificationType.Base));
+			GeoUnion body = new GeoUnion(Vector3.Zero, Vector3.Zero, ConsoleColor.Red, bodyparts, GeoUnion.CalculationType.Cutout, GeoUnion.ModificationType.Base);
+
+			Geometry face = new Ellipsoid(new Vector3(0f, 1f, -0.15f), Vector3.Zero, ConsoleColor.White, new Vector3(0.7f, 0.5f, 0.9f));
+
+			mainScene.geometries.Add(body);
+			mainScene.geometries.Add(face);
+
 
 			while (true)
 			{
 				if (!Console.KeyAvailable)
 				{
+					Vector3 oldPos = cam.position;
+					cam.position = Vector3.Zero;
 					cam.SetForward(Vector3.Forward);
 					cam.RotatePitch(cam.rotation.x);
 					cam.RotateYaw(cam.rotation.y);
+					cam.position = oldPos;
 
-					//mainScene.light.position.x = (float)Math.Sin(tick * 0.1f) / 2;
-					//mainScene.light.position.y = (float)Math.Cos(tick * 0.1f) / 2;
 
-					geo.t = (float)(Math.Sin(tick * 0.1f) + 1) / 2;
-
-					//geo.shapes[1].position.x = (float)Math.Sin(tick * 0.1f) * 2;
 					cam.Render(mainScene);
 					Renderer.Render();
 					tick++;
