@@ -109,7 +109,7 @@ namespace RayMarching
 						//Caculate which direction the ray will travel, based on which pixel is currently selected
 						Vector3 xComp = right * (x * pixelSize.x - halfWidth);
 						Vector3 yComp = up * (y * pixelSize.y - halfHeight);
-						Vector3 heading = (forward + xComp + yComp).Normalised();
+						Vector3 heading = Vector3.Normalise((forward + xComp + yComp));
 
 						Geometry hitObject = CastRay(scene, point, heading, MaxRayDistance, MaxMarchSteps, CollisionThreshold, out Collision col, new Vector2(-x, y));
 
@@ -177,11 +177,11 @@ namespace RayMarching
 		{
 			//Trapezoidal stuff, idk what any of this does
 
-			return (epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
+			return Vector3.Normalise(epsXYY * geometry.SignedDist(point + epsXYY * epsilon) +
 					epsYYX * geometry.SignedDist(point + epsYYX * epsilon) +
 					epsYXY * geometry.SignedDist(point + epsYXY * epsilon) +
 					epsXXX * geometry.SignedDist(point + epsXXX * epsilon)
-					).Normalised();
+					);
 		}
 
 		public struct Collision
